@@ -1,0 +1,30 @@
+# Eclipse project files
+.project
+.classpath
+.settings/
+.metadata/
+
+# Build output folders
+bin/
+target/
+build/
+
+# Keep your lib/ JARs, ignore others
+*.jar
+!lib/*.jar
+
+# Optional JAR folders (uncomment if needed)
+# dist/
+# output/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
