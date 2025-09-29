@@ -1,30 +1,31 @@
-# Eclipse project files
+# === Eclipse project files ===
 .project
 .classpath
 .settings/
 .metadata/
 
-# Build output folders
+# === Build output ===
 bin/
 target/
 build/
 
-# Keep your lib/ JARs, ignore others
+# === Keep your lib/ JARs ===
 *.jar
 !lib/*.jar
 
-# Optional JAR folders (uncomment if needed)
+# === Other JAR folders (optional) ===
+# If you only use lib/, you can ignore others like:
 # dist/
 # output/
 
-# OS-specific files
+# === OS-specific files ===
 .DS_Store
 Thumbs.db
 
-# IDE-specific files
+# === IDEs ===
 .vscode/
 .idea/
 
-# Logs and temp files
+# === Logs and temporary files ===
 *.log
 *.tmp
