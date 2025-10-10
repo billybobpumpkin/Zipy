@@ -38,7 +38,7 @@ public class ZipReader implements IReader
 	}
 	
 	@Override
-	public boolean extractFiles()
+	public boolean extractFiles() throws IOException
 	{
 		File outputFolder = new File(outputPath);
 		ZipEntry zipEntry;
@@ -63,32 +63,28 @@ public class ZipReader implements IReader
                         int len;
                         while ((len = zis.read(buffer)) > 0)
                             fos.write(buffer, 0, len);
+                    } catch(IOException e) {
+                    	Zipy.deleteDirectory(outputFolder);
+                    	return false;
                     }
                 }
                 zis.closeEntry();
 			}
 			
 			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		
-		return false;
 	}
 
 	@Override
-	public boolean isPasswordProtected()
+	public boolean isPasswordProtected() throws IOException
 	{
 		try(ZipFile zipped = new ZipFile(new File(zipFilePath))) {
 			return zipped.isEncrypted();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		return true;
 	}
 
 	@Override
-	public List<String> listEntries()
+	public List<String> listEntries() throws IOException
 	{
 		List<String> entries = new ArrayList<>();
 		
@@ -103,7 +99,7 @@ public class ZipReader implements IReader
 	}
 	
 	@Override
-	public int getNumberOfItemsInArchive()
+	public int getNumberOfItemsInArchive() throws IOException
 	{
 		return this.listEntries().size();
 	}

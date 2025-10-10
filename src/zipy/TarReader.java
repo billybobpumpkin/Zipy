@@ -39,7 +39,7 @@ public class TarReader implements IReader
 	}
 
 	@Override
-	public boolean extractFiles()
+	public boolean extractFiles() throws IOException
 	{
 		File outputDir = new File(outputPath);
 		
@@ -62,15 +62,15 @@ public class TarReader implements IReader
                     int bytesRead;
                     while ((bytesRead = tais.read(buffer)) != -1)
                         fos.write(buffer, 0, bytesRead);
+                } catch(IOException e) {
+                	e.printStackTrace();
+                	Zipy.deleteDirectory(outputDir);
+                	return false;
                 }
 			}
 			
 			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		
-		return false;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class RarReader implements IReader
 	}
 
 	@Override
-	public boolean extractFiles()
+	public boolean extractFiles() throws IOException
 	{
 		File outputDir = new File(outputPath);
 		
@@ -51,44 +51,45 @@ public class RarReader implements IReader
 				File outputFile = new File(outputDir, fh.getFileName());
                 try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 	archive.extractFile(fh, fos);
+                } catch(IOException e) {
+                	Zipy.deleteDirectory(outputDir);
+                	return false;
                 }
 			}
 			
 			return true;
-		} catch(RarException | IOException e) {
-			e.printStackTrace();
+		} catch (RarException e) {
+			 throw new IOException(e);
 		}
-		
-		return false;
 	}
 
 	@Override
-	public boolean isPasswordProtected()
+	public boolean isPasswordProtected() throws IOException
 	{
 		try (Archive archive = new Archive(new File(rarFilePath))) {
            return archive.isEncrypted();
-        } catch (RarException | IOException e) {
-        	return false;
+        } catch (RarException e) {
+        	 throw new IOException(e);
         }
 	}
 
 	@Override
-	public List<String> listEntries()
+	public List<String> listEntries() throws IOException
 	{
 		List<String> entries = new ArrayList<String>();
 		
 		try (Archive archive = new Archive(new File(rarFilePath))) {
 			for(FileHeader fh : archive.getFileHeaders())
 				entries.add(fh.getFileName());
-        } catch (RarException | IOException e) {
-        	e.printStackTrace();
+        } catch (RarException e) {
+        	 throw new IOException(e);
         }
 		
 		return entries;
 	}
 
 	@Override
-	public int getNumberOfItemsInArchive()
+	public int getNumberOfItemsInArchive() throws IOException
 	{
 		return this.listEntries().size();
 	}

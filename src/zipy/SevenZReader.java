@@ -54,7 +54,7 @@ public class SevenZReader implements IReader
 	}
 	
 	@Override
-	public boolean extractFiles()
+	public boolean extractFiles() throws IOException
 	{
 		File outputDir = new File(outputPath);
 		
@@ -64,7 +64,9 @@ public class SevenZReader implements IReader
 		try (SeekableByteChannel channel = Files.newByteChannel(Paths.get(zipFilePath));
 			SevenZFile sevenZFile = SevenZFile.builder().setSeekableByteChannel(channel)
 														.get()) {
-			sevenZFile.getEntries().forEach(entry -> {
+			SevenZArchiveEntry entry;
+			while((entry = sevenZFile.getNextEntry()) != null)
+			{
 				if (!entry.isDirectory())
 				{
 					File outFile = new File(outputDir, entry.getName());
@@ -75,20 +77,18 @@ public class SevenZReader implements IReader
 						out.write(stuff);
 					} catch (IOException e) {
 						e.printStackTrace();
+						Zipy.deleteDirectory(outputDir);
+						return false;
 					}
 				}
-			});
+			}
 			
 			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		
-		return false;
 	}
 
 	@Override
-	public boolean isPasswordProtected()
+	public boolean isPasswordProtected() throws IOException
 	{
 		try (SeekableByteChannel channel = Files.newByteChannel(new File(zipFilePath).toPath());
 				SevenZFile sevenZFile = SevenZFile.builder().setSeekableByteChannel(channel)
@@ -102,12 +102,13 @@ public class SevenZReader implements IReader
             // then the archive is password-protected.
             if (e.getMessage() != null && e.getMessage().contains("Cannot read encrypted files without a password"))
                 return true;
-            return false;
+            else
+            	throw new IOException("Fatal error occured.");
         }
 	}
 
 	@Override
-	public List<String> listEntries()
+	public List<String> listEntries() throws IOException
 	{
 		List<String> entries = new ArrayList<>();
 		
@@ -117,39 +118,31 @@ public class SevenZReader implements IReader
             SevenZArchiveEntry entry;
             while((entry = sevenZFile.getNextEntry()) != null)
             	entries.add(entry.getName());
-        } catch (IOException e) {
-        	e.printStackTrace();
         }
 		
 		return entries;
 	}
 	
 	/*
-	 * Taken directly from the wikipedia!!
+	 * Taken directly from the SevenZipJBinding wikipedia!!
 	 */
 	@Override
-	public int getNumberOfItemsInArchive()
+	public int getNumberOfItemsInArchive() throws IOException
 	{
 		IInArchive archive;
 	    RandomAccessFile randomAccessFile;
 
-	    try {
-	    	randomAccessFile = new RandomAccessFile(zipFilePath, "r");
+	    randomAccessFile = new RandomAccessFile(zipFilePath, "r");
 
-		    archive = SevenZip.openInArchive(ArchiveFormat.ZIP, // null - autodetect
-		            new RandomAccessFileInStream(randomAccessFile));
+	    archive = SevenZip.openInArchive(ArchiveFormat.ZIP, // null - autodetect
+	            new RandomAccessFileInStream(randomAccessFile));
 
-		    int numberOfItems = archive.getNumberOfItems();
+	    int numberOfItems = archive.getNumberOfItems();
 
-		    archive.close();
-		    randomAccessFile.close();
-		    
-		    return numberOfItems;
-	    } catch (IOException e) {
-	    	e.printStackTrace();
-	    }
+	    archive.close();
+	    randomAccessFile.close();
 	    
-	    return -1;
+	    return numberOfItems;
 	}
 	
 	
